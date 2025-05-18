@@ -9,6 +9,7 @@ import com.abhinavmehta.confx.repository.ConfigItemRepository;
 import com.abhinavmehta.confx.repository.ConfigVersionRepository;
 import com.abhinavmehta.confx.repository.EnvironmentRepository;
 import com.abhinavmehta.confx.service.helpers.ConfigValueValidator;
+import com.abhinavmehta.confx.service.RuleService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 // import org.springframework.context.ApplicationEventPublisher; // For SSE/WebSocket later
@@ -26,6 +27,7 @@ public class ConfigVersionService {
     private final ConfigItemRepository configItemRepository;
     private final EnvironmentRepository environmentRepository;
     private final ConfigValueValidator configValueValidator;
+    private final RuleService ruleService;
     // private final ApplicationEventPublisher eventPublisher; // For SSE/WebSocket later
 
     @Transactional
@@ -37,13 +39,11 @@ public class ConfigVersionService {
                 .orElseThrow(() -> new EntityNotFoundException("Environment not found with id: " + environmentId + " in project: " + projectId));
 
         if (!configValueValidator.isValid(publishDto.getValue(), configItem.getDataType())) {
-            throw new IllegalArgumentException("Invalid value for data type " + configItem.getDataType() +
+            throw new IllegalArgumentException("Invalid default value for data type " + configItem.getDataType() +
                                              ". Provided value: '" + publishDto.getValue() + "'");
         }
 
-        // Deactivate current active version(s) for this item and environment
         configVersionRepository.deactivateActiveVersions(configItemId, environmentId);
-
         Integer nextVersionNumber = configVersionRepository.findMaxVersionNumberByConfigItemAndEnvironment(configItemId, environmentId) + 1;
 
         ConfigVersion newVersion = ConfigVersion.builder()
@@ -54,15 +54,16 @@ public class ConfigVersionService {
                 .versionNumber(nextVersionNumber)
                 .changeDescription(publishDto.getChangeDescription())
                 .build();
+        newVersion = configVersionRepository.save(newVersion); // Save version first to get its ID
 
-        newVersion = configVersionRepository.save(newVersion);
+        // Set rules for the new version
+        if (publishDto.getRules() != null) {
+            ruleService.setRulesForConfigVersion(newVersion, publishDto.getRules(), configItem);
+        }
         
         // TODO: Trigger event for SSE/WebSocket update here
-        // String eventData = String.format("{\"configKey\": \"%s\", \"environmentId\": %d, \"newValue\": \"%s\"}", 
-        //                                configItem.getConfigKey(), environmentId, newVersion.getValue());
-        // eventPublisher.publishEvent(new ConfigUpdateEvent(this, eventData));
 
-        return mapToDto(newVersion);
+        return mapToDto(newVersion); // mapToDto will need to fetch rules
     }
 
     @Transactional(readOnly = true)
@@ -110,22 +111,25 @@ public class ConfigVersionService {
         ConfigVersion versionToRestore = configVersionRepository.findById(versionIdToRollbackTo)
                 .orElseThrow(() -> new EntityNotFoundException("Version to rollback to (id: " + versionIdToRollbackTo + ") not found."));
 
-        // Validate that the versionToRestore belongs to the correct configItem and environment
         if (!versionToRestore.getConfigItem().getId().equals(configItemId) || 
             !versionToRestore.getEnvironment().getId().equals(environmentId) ||
             !versionToRestore.getConfigItem().getProject().getId().equals(projectId)) {
             throw new IllegalArgumentException("Rollback version does not match the specified project, environment, or config item.");
         }
 
+        // Fetch rules from the version being rolled back to
+        List<RuleDto> rulesToRestore = ruleService.getRulesForConfigVersion(versionToRestore.getId());
+
         PublishConfigRequestDto publishDto = new PublishConfigRequestDto();
         publishDto.setValue(versionToRestore.getValue());
         publishDto.setChangeDescription("Rolled back to version #" + versionToRestore.getVersionNumber() + " (ID: " + versionToRestore.getId() + ")");
+        publishDto.setRules(rulesToRestore);
 
-        // This reuses the publishNewVersion logic, which deactivates the current active and creates a new active version.
         return publishNewVersion(projectId, environmentId, configItemId, publishDto);
     }
 
     private ConfigVersionResponseDto mapToDto(ConfigVersion configVersion) {
+        List<RuleDto> ruleDtos = ruleService.getRulesForConfigVersion(configVersion.getId());
         return ConfigVersionResponseDto.builder()
                 .id(configVersion.getId())
                 .configItemId(configVersion.getConfigItem().getId())
@@ -137,6 +141,7 @@ public class ConfigVersionService {
                 .isActive(configVersion.isActive())
                 .versionNumber(configVersion.getVersionNumber())
                 .changeDescription(configVersion.getChangeDescription())
+                .rules(ruleDtos) // Added rules here
                 .createdAt(configVersion.getCreatedAt())
                 .updatedAt(configVersion.getUpdatedAt())
                 .build();
