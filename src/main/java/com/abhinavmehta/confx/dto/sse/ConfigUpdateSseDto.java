@@ -13,5 +13,8 @@ public class ConfigUpdateSseDto {
     private Object payload; // Can be ConfigVersionResponseDto or just a key/ID
 
     public static final String TYPE_CONFIG_VERSION_UPDATED = "CONFIG_VERSION_UPDATED";
-    // Add other types as needed, e.g., for config item deletion
+    public static final String TYPE_CONFIG_ITEM_DELETED = "CONFIG_ITEM_DELETED";
+    public static final String TYPE_ENVIRONMENT_DELETED = "ENVIRONMENT_DELETED";
+    public static final String TYPE_PROJECT_DELETED = "PROJECT_DELETED";
+    // Add other types as needed
 } 

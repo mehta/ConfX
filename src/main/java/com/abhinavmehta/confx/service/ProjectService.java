@@ -4,8 +4,10 @@ import com.abhinavmehta.confx.dto.CreateProjectRequestDto;
 import com.abhinavmehta.confx.dto.ProjectResponseDto;
 import com.abhinavmehta.confx.entity.Project;
 import com.abhinavmehta.confx.repository.ProjectRepository;
+import com.abhinavmehta.confx.events.ProjectDeletedEvent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ProjectResponseDto createProject(CreateProjectRequestDto createProjectRequestDto) {
@@ -81,6 +84,8 @@ public class ProjectService {
         // Consider implications: what happens to environments, configs under this project?
         // For now, simple delete. Cascade or logical delete might be needed later.
         projectRepository.deleteById(projectId);
+        // Publish event AFTER successful deletion
+        eventPublisher.publishEvent(new ProjectDeletedEvent(this, projectId));
     }
 
     private ProjectResponseDto mapToDto(Project project) {

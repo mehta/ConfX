@@ -7,8 +7,10 @@ import com.abhinavmehta.confx.entity.ConfigItem;
 import com.abhinavmehta.confx.entity.Project;
 import com.abhinavmehta.confx.repository.ConfigItemRepository;
 import com.abhinavmehta.confx.repository.ProjectRepository;
+import com.abhinavmehta.confx.events.ConfigItemDeletedEvent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ public class ConfigItemService {
 
     private final ConfigItemRepository configItemRepository;
     private final ProjectRepository projectRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ConfigItemResponseDto createConfigItem(Long projectId, CreateConfigItemRequestDto createDto) {
@@ -101,10 +104,10 @@ public class ConfigItemService {
         if (!configItem.getProject().getId().equals(projectId)) {
              throw new IllegalArgumentException("ConfigItem with id " + configItemId + " does not belong to project " + projectId);
         }
-        // Deleting a ConfigItem should also delete its associated ConfigVersions and Rules.
-        // This will be handled by ON DELETE CASCADE in the DB for ConfigVersions.
-        // Rules associated with this ConfigItem might need explicit cleanup if not cascaded.
+        String configKey = configItem.getConfigKey();
+        
         configItemRepository.deleteById(configItemId);
+        eventPublisher.publishEvent(new ConfigItemDeletedEvent(this, projectId, configItemId, configKey));
     }
 
     private ConfigItemResponseDto mapToDto(ConfigItem configItem) {

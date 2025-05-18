@@ -6,8 +6,10 @@ import com.abhinavmehta.confx.entity.Environment;
 import com.abhinavmehta.confx.entity.Project;
 import com.abhinavmehta.confx.repository.EnvironmentRepository;
 import com.abhinavmehta.confx.repository.ProjectRepository;
+import com.abhinavmehta.confx.events.EnvironmentDeletedEvent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ public class EnvironmentService {
 
     private final EnvironmentRepository environmentRepository;
     private final ProjectRepository projectRepository; // To verify project existence
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public EnvironmentResponseDto createEnvironment(Long projectId, CreateEnvironmentRequestDto createDto) {
@@ -92,7 +95,6 @@ public class EnvironmentService {
 
     @Transactional
     public void deleteEnvironment(Long projectId, Long environmentId) {
-        // Ensure project exists
         projectRepository.findById(projectId)
             .orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + projectId));
             
@@ -103,7 +105,9 @@ public class EnvironmentService {
             throw new IllegalArgumentException("Environment with id " + environmentId + " does not belong to project " + projectId + ". Delete operation denied.");
         }
         
-        environmentRepository.deleteById(environmentId); // ON DELETE CASCADE will handle related data in DB if any
+        environmentRepository.deleteById(environmentId);
+        // Publish event AFTER successful deletion
+        eventPublisher.publishEvent(new EnvironmentDeletedEvent(this, projectId, environmentId));
     }
 
     private EnvironmentResponseDto mapToDto(Environment environment) {
