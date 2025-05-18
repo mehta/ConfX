@@ -26,4 +26,6 @@ public interface ConfigVersionRepository extends JpaRepository<ConfigVersion, Lo
     
     Optional<ConfigVersion> findByConfigItemIdAndEnvironmentIdAndVersionNumber(Long configItemId, Long environmentId, Integer versionNumber);
 
+    List<ConfigVersion> findByEnvironmentIdAndIsActiveTrue(Long environmentId);
+
 } 

@@ -10,9 +10,10 @@ import com.abhinavmehta.confx.repository.ConfigVersionRepository;
 import com.abhinavmehta.confx.repository.EnvironmentRepository;
 import com.abhinavmehta.confx.service.helpers.ConfigValueValidator;
 import com.abhinavmehta.confx.service.RuleService;
+import com.abhinavmehta.confx.events.ConfigVersionUpdatedEvent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-// import org.springframework.context.ApplicationEventPublisher; // For SSE/WebSocket later
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class ConfigVersionService {
     private final EnvironmentRepository environmentRepository;
     private final ConfigValueValidator configValueValidator;
     private final RuleService ruleService;
-    // private final ApplicationEventPublisher eventPublisher; // For SSE/WebSocket later
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ConfigVersionResponseDto publishNewVersion(Long projectId, Long environmentId, Long configItemId, PublishConfigRequestDto publishDto) {
@@ -61,9 +62,9 @@ public class ConfigVersionService {
             ruleService.setRulesForConfigVersion(newVersion, publishDto.getRules(), configItem);
         }
         
-        // TODO: Trigger event for SSE/WebSocket update here
-
-        return mapToDto(newVersion); // mapToDto will need to fetch rules
+        ConfigVersionResponseDto responseDto = mapToDto(newVersion); // mapToDto now includes rules
+        eventPublisher.publishEvent(new ConfigVersionUpdatedEvent(this, projectId, environmentId, responseDto));
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
@@ -126,6 +127,21 @@ public class ConfigVersionService {
         publishDto.setRules(rulesToRestore);
 
         return publishNewVersion(projectId, environmentId, configItemId, publishDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConfigVersionResponseDto> getAllActiveConfigsForEnvironment(Long projectId, Long environmentId) {
+        // First, verify the project and environment exist and are related.
+        Environment environment = environmentRepository.findByIdAndProjectId(environmentId, projectId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                String.format("Environment with id %d not found in project %d", environmentId, projectId)));
+        
+        return configVersionRepository.findByEnvironmentIdAndIsActiveTrue(environmentId)
+                .stream()
+                // Ensure that the config items of these versions belong to the requested project
+                .filter(cv -> cv.getConfigItem().getProject().getId().equals(projectId))
+                .map(this::mapToDto) // mapToDto already includes rules
+                .collect(Collectors.toList());
     }
 
     private ConfigVersionResponseDto mapToDto(ConfigVersion configVersion) {
