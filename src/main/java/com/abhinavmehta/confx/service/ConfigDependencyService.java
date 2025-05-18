@@ -6,6 +6,7 @@ import com.abhinavmehta.confx.entity.ConfigDependency;
 import com.abhinavmehta.confx.entity.ConfigItem;
 import com.abhinavmehta.confx.repository.ConfigDependencyRepository;
 import com.abhinavmehta.confx.repository.ConfigItemRepository;
+import com.abhinavmehta.confx.repository.ProjectRepository;
 import com.abhinavmehta.confx.service.helpers.ConfigValueValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class ConfigDependencyService {
 
     private final ConfigDependencyRepository dependencyRepository;
     private final ConfigItemRepository configItemRepository;
+    private final ProjectRepository projectRepository;
     private final ConfigValueValidator configValueValidator; // To validate prerequisiteExpectedValue against prerequisite's data type
 
     @Transactional
@@ -112,6 +114,16 @@ public class ConfigDependencyService {
         dependencyRepository.deleteById(dependencyId);
     }
     
+    @Transactional(readOnly = true)
+    public List<ConfigDependencyResponseDto> getAllDependenciesForProject(Long projectId) {
+        projectRepository.findById(projectId)
+            .orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + projectId));
+
+        return dependencyRepository.findAllByDependentProject(projectId).stream()
+            .map(this::mapToDto)
+            .collect(Collectors.toList());
+    }
+
     // Helper to map to DTO
     private ConfigDependencyResponseDto mapToDto(ConfigDependency dependency) {
         return ConfigDependencyResponseDto.builder()
