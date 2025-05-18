@@ -1,0 +1,49 @@
+# macOS
+.DS_Store
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Compiled class files
+*.class
+
+# Java
+*.jar
+*.war
+*.ear
+
+# Package Files
+*.jar
+*.war
+*.ear
+
+# Others
+bin/
+*.iml
+*.ipr
+*.iws
+
+# SDK and Client specific
+config-client-sdk/bin/
+sample-sdk-client/bin/
+
+# Exclude application logs
+logs/
+
+# Exclude any other temporary files
+*.tmp
+*.swp
+*.swo
+
+# Exclude build output
+backend/build/
+config-client-sdk/build/
+sample-sdk-client/build/
