@@ -45,7 +45,7 @@ public class SseService {
         
         try {
             emitter.send(SseEmitter.event().name("connection_established").data("SSE connection established for " + emitterKey).id(String.valueOf(System.currentTimeMillis())));
-            emitter.send(SseEmitter.comment("ping"));
+            emitter.send(SseEmitter.event().comment("ping"));
         } catch (IOException e) {
             log.warn("Failed to send initial messages for emitter {}: {}. Removing.", emitterKey, e.getMessage());
             removeEmitter(projectId, environmentId, emitter);
@@ -120,7 +120,7 @@ public class SseService {
             log.trace("Sending heartbeat to {} emitters for key: {}", emitters.size(), key);
             for (SseEmitter emitter : emitters) {
                 try {
-                    emitter.send(SseEmitter.comment("ping"));
+                    emitter.send(SseEmitter.event().comment("ping"));
                 } catch (IOException e) {
                     log.warn("Failed to send heartbeat to emitter for key {}: {}. Marking for removal.", key, e.getMessage());
                     emittersToRemoveOnHeartbeat.add(emitter);

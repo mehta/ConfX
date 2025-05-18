@@ -2,6 +2,7 @@ package com.abhinavmehta.confx.service;
 
 import com.abhinavmehta.confx.dto.ConfigVersionResponseDto;
 import com.abhinavmehta.confx.dto.PublishConfigRequestDto;
+import com.abhinavmehta.confx.dto.RuleDto;
 import com.abhinavmehta.confx.entity.ConfigItem;
 import com.abhinavmehta.confx.entity.ConfigVersion;
 import com.abhinavmehta.confx.entity.Environment;

@@ -30,6 +30,7 @@ public class ConfigVersion extends BaseEntity {
     @Column(name = "value", columnDefinition = "TEXT")
     private String value; // Stored as string, actual type interpretation based on ConfigItem.dataType
 
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 

@@ -74,15 +74,15 @@ public class ConfigDependencyService {
      * This means checking if potentialPrerequisite already has potentialDependent as one of its prerequisites (directly or indirectly).
      */
     private boolean isCircularDependency(Long currentItemId, Long targetItemId, Set<Long> visited) {
-        if (currentItem.equals(targetItemId)) {
+        if (currentItemId.equals(targetItemId)) {
             return true; // Found the target, cycle detected
         }
-        if (visited.contains(currentItem)) {
+        if (visited.contains(currentItemId)) {
             return false; // Already visited this path, no cycle found through here
         }
-        visited.add(currentItem);
+        visited.add(currentItemId);
 
-        List<ConfigDependency> prerequisites = dependencyRepository.findByDependentConfigItemId(currentItem);
+        List<ConfigDependency> prerequisites = dependencyRepository.findByDependentConfigItemId(currentItemId);
         for (ConfigDependency prereq : prerequisites) {
             if (isCircularDependency(prereq.getPrerequisiteConfigItem().getId(), targetItemId, new HashSet<>(visited))) {
                 return true;

@@ -2,12 +2,13 @@ package com.abhinavmehta.confx.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
 @Table(name = "rules", schema = "confx_schema",
     uniqueConstraints = {
