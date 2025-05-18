@@ -1,4 +1,4 @@
-# ConfX - Full-Stack Feature/Config Management Service
+# ConfX - Headless Feature/Config Management Service
 
 ConfX is a comprehensive feature flag and configuration management service designed to provide real-time updates, multi-environment support, version control, and a powerful rule engine for targeted configuration delivery.
 
