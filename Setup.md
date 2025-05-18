@@ -262,9 +262,9 @@ The ConfX project includes a Java SDK located in the `ConfXSDK` directory. This 
 
 Detailed SDK usage, including evaluation context and specific value getters, is provided within the SDK's own documentation or examples (if available). The SDK handles in-memory caching, SSE updates, and client-side rule/dependency evaluation automatically once initialized.
 
-## Part 3: Sample Data Setup & API Testing (TMS Domain)
+## Part 3: Sample Data Setup & API Testing
 
-This section provides steps to populate the ConfX server with sample data relevant to a Transport Management Service (TMS) domain. It includes configurations for different business units, carriers, and feature flags. Corresponding cURL commands are provided to test all major API functionalities.
+This section provides steps to populate the ConfX server with sample data. It includes configurations for different business units, carriers, and feature flags. Corresponding cURL commands are provided to test all major API functionalities.
 
 **Assumptions:**
 *   The ConfX server is running on `http://localhost:8080`.
