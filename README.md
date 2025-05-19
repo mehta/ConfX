@@ -170,9 +170,11 @@ This incremental approach, from basic organizational units to complex real-time 
 
 ## What's Next?
 ### Step by step commands to set it up locally:
-[CaseStudy1](https://github.com/mehta/ConfX/blob/master/Setup.md)
+[Setup Guide](https://github.com/mehta/ConfX/blob/master/Setup.md)
 
 ### Ready to test cURL requests:
 [CaseStudy1](https://github.com/mehta/ConfX/blob/master/Usage1.md)
+
 [CaseStudy2](https://github.com/mehta/ConfX/blob/master/Usage2.md)
+
 [CaseStudy3](https://github.com/mehta/ConfX/blob/master/Usage3.md)

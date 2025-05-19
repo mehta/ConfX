@@ -265,5 +265,7 @@ Detailed SDK usage, including evaluation context and specific value getters, is 
 ## What's Next?
 ### Ready to test cURL requests:
 [CaseStudy1](https://github.com/mehta/ConfX/blob/master/Usage1.md)
+
 [CaseStudy2](https://github.com/mehta/ConfX/blob/master/Usage2.md)
+
 [CaseStudy3](https://github.com/mehta/ConfX/blob/master/Usage3.md)
