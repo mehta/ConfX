@@ -166,3 +166,13 @@ ConfX is a powerful, self-hosted solution for managing dynamic configurations an
 *   **SDK Action:** The SDK calls this endpoint upon startup, populates its in-memory cache, and then relies on SSE for subsequent delta updates.
 
 This incremental approach, from basic organizational units to complex real-time evaluation and update mechanisms, forms the core of the ConfX service. 
+
+
+## What's Next?
+### Step by step commands to set it up locally:
+[CaseStudy1](https://github.com/mehta/ConfX/blob/master/Setup.md)
+
+### Ready to test cURL requests:
+[CaseStudy1](https://github.com/mehta/ConfX/blob/master/Usage1.md)
+[CaseStudy2](https://github.com/mehta/ConfX/blob/master/Usage2.md)
+[CaseStudy3](https://github.com/mehta/ConfX/blob/master/Usage3.md)
