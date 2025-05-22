@@ -55,7 +55,7 @@ These steps will guide you through setting up the ConfX Spring Boot server.
     -- Connect to the confx_db if not already: \c confx_db
     -- The user needs CREATE ON DATABASE implicitly or explicitly to create schemas if it owns the DB
     -- If not owning the database, grant schema creation privilege directly:
-    -- GRANT CREATE ON DATABASE confx_db TO confx_user;
+    GRANT CREATE ON DATABASE confx_db TO confx_user;
     ```
     Flyway is configured to create the schema `confx_schema` if it doesn't exist. The `confx_user` being the owner of `confx_db` usually suffices.
 
@@ -63,8 +63,8 @@ These steps will guide you through setting up the ConfX Spring Boot server.
 
 1.  **Clone the Repository (if not already done):**
     ```bash
-    # git clone <repository_url>
-    # cd <repository_directory>
+    # git clone https://github.com/mehta/ConfX.git
+    # cd ConfX
     ```
 2.  **Configure Database Connection:**
     Open the main application configuration file: `src/main/resources/application.properties`.
